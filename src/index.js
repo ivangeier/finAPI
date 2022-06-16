@@ -134,4 +134,16 @@ app.get('/statement/date', accountExists, (request, response) => {
 	return response.status(200).json(statement);
 });
 
+/**
+ * UPDATE ACCOUNT
+ */
+app.put('/account', accountExists, (request, response) => {
+	const { name } = request.body;
+	const { customer } = request;
+
+	customer.name = name;
+
+	return response.status(201).send();
+});
+
 app.listen(3333);
