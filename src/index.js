@@ -58,7 +58,7 @@ app.post('/account', (request, response) => {
 	customers.push({
 		cpf,
 		name,
-		id: uuidv4,
+		id,
 		statement: [],
 	});
 
@@ -144,6 +144,15 @@ app.put('/account', accountExists, (request, response) => {
 	customer.name = name;
 
 	return response.status(201).send();
+});
+
+/**
+ * GET ACCOUNT
+ */
+app.get('/account', accountExists, (request, response) => {
+	const { customer } = request;
+
+	return response.status(200).json(customer);
 });
 
 app.listen(3333);
