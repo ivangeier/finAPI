@@ -122,7 +122,6 @@ app.post('/withdraw', accountExists, (request, response) => {
 app.get('/statement/date', accountExists, (request, response) => {
 	const { customer } = request;
 	const { date } = request.query;
-	console.log(date);
 
 	const dateFormat = new Date(date + ' 00:00');
 
