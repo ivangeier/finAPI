@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { request, response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 
 const app = express();
@@ -22,6 +22,21 @@ function accountExists(request, response, next) {
 	request.customer = customer;
 
 	return next();
+}
+
+/**
+ * UTILS
+ */
+function getBalance(statement) {
+	const balance = statement.reduce((acc, operation) => {
+		if (operation.type === 'credit') {
+			return acc + operation.amount;
+		} else {
+			return acc - operation.amount;
+		}
+	}, 0);
+
+	return balance;
 }
 
 /**
@@ -56,6 +71,49 @@ app.post('/account', (request, response) => {
 app.get('/statement', accountExists, (request, response) => {
 	const { customer } = request;
 	return response.status(200).json(customer.statement);
+});
+
+/**
+ * DEPOSIT IN ACCOUNT
+ */
+app.post('/deposit', accountExists, (request, response) => {
+	const { amount, description } = request.body;
+	const { customer } = request;
+
+	const statementOperation = {
+		description,
+		amount,
+		created_at: new Date(),
+		type: 'credit',
+	};
+
+	customer.statement.push(statementOperation);
+
+	return response.status(200).send();
+});
+
+/**
+ * WITHDRAW FROM ACCOUNT
+ */
+app.post('/withdraw', accountExists, (request, response) => {
+	const { amount } = request.body;
+	const { customer } = request;
+
+	const balance = getBalance(customer.statement);
+
+	if (balance < amount) {
+		return response.status(400).json({ error: 'Non-Sufficient Funds (NSF)' });
+	}
+
+	const statementOperation = {
+		amount,
+		created_at: new Date(),
+		type: 'debit',
+	};
+
+	customer.statement.push(statementOperation);
+
+	return response.status(200).send();
 });
 
 app.listen(3333);
