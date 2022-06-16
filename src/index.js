@@ -9,6 +9,7 @@ app.use(express.json());
 const customers = [];
 
 /**
+ * CREATE ACCOUNT
  * cpf - string
  * name - string
  * id - uuid
@@ -35,6 +36,21 @@ app.post('/account', (request, response) => {
 	});
 
 	return response.status(201).send();
+});
+
+/**
+ * GET USER STATEMENT
+ */
+app.get('/statement', (request, response) => {
+	const { cpf } = request.headers;
+
+	const customer = customers.find((customer) => customer.cpf === cpf);
+
+	if (customer) {
+		return response.status(200).json(customer.statement);
+	}
+
+	return response.status(400).json({ error: 'Customer not found.' });
 });
 
 app.listen(3333);
