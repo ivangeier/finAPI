@@ -9,11 +9,23 @@ app.use(express.json());
 const customers = [];
 
 /**
+ * MIDDLEWARE
+ */
+function accountExists(request, response, next) {
+	const { cpf } = request.headers;
+	const customer = customers.find((customer) => customer.cpf === cpf);
+
+	if (!customer) {
+		return response.status(400).json({ error: 'Customer not found.' });
+	}
+
+	request.customer = customer;
+
+	return next();
+}
+
+/**
  * CREATE ACCOUNT
- * cpf - string
- * name - string
- * id - uuid
- * statement - []
  */
 app.post('/account', (request, response) => {
 	const { cpf, name } = request.body;
@@ -41,16 +53,9 @@ app.post('/account', (request, response) => {
 /**
  * GET USER STATEMENT
  */
-app.get('/statement', (request, response) => {
-	const { cpf } = request.headers;
-
-	const customer = customers.find((customer) => customer.cpf === cpf);
-
-	if (customer) {
-		return response.status(200).json(customer.statement);
-	}
-
-	return response.status(400).json({ error: 'Customer not found.' });
+app.get('/statement', accountExists, (request, response) => {
+	const { customer } = request;
+	return response.status(200).json(customer.statement);
 });
 
 app.listen(3333);
