@@ -155,4 +155,15 @@ app.get('/account', accountExists, (request, response) => {
 	return response.status(200).json(customer);
 });
 
+/**
+ * DELETE ACCOUNT
+ */
+app.delete('/account', accountExists, (request, response) => {
+	const { customer } = request;
+
+	customers.splice(customers.indexOf(customer), 1);
+
+	return response.status(200).json(customers);
+});
+
 app.listen(3333);
